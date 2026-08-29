@@ -37,3 +37,5 @@ Open [`index.html`](index.html) directly in a browser, or serve the folder with 
 ```
 
 Built with ♥ by Robbie Ma.
+
+AI used for creating base front-end code. Human Design. 
