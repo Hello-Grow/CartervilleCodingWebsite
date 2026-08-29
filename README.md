@@ -6,7 +6,7 @@
 ![Static site](https://img.shields.io/badge/site-static-1d7af3?style=for-the-badge)
 ![Made by students](https://img.shields.io/badge/made%20by-students-f5b942?style=for-the-badge)
 
-## ✦ Explore the site
+## Explore the site
 
 | Page | What you’ll find |
 | --- | --- |
@@ -20,11 +20,11 @@
         Carterville Coding Club
 ```
 
-## ✧ Run locally
+## Run locally
 
 Open [`index.html`](index.html) directly in a browser, or serve the folder with any simple static web server.
 
-## ◇ Project map
+## Project map
 
 ```text
 ├── index.html       # Landing page
