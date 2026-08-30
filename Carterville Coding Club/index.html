@@ -104,7 +104,13 @@
               </p>
             </div>
 
-            <article class="project-card project-one">
+            <!--
+              These 3 cards are populated live from the club GitHub org (see script
+              below), the same way projects.html is. The markup/classes below are
+              fallback content and are only shown if the API call fails or hasn't
+              finished loading yet.
+            -->
+            <article class="project-card project-one" data-home-project-slot="0">
               <div class="window-top">
                 <img class="dot dot-one" src="assets/figma/ellipse-434.svg" alt="" />
                 <img class="dot dot-two" src="assets/figma/ellipse-435.svg" alt="" />
@@ -114,10 +120,10 @@
               <img class="project-image" src="assets/figma/image-218.png" alt="Ball Rolling project screenshot" />
               <img class="line line-top" src="assets/figma/line-1.svg" alt="" />
               <img class="line line-bottom" src="assets/figma/line-2.svg" alt="" />
-              <p>Student - Unity - 2025</p>
+              <p class="project-meta">Student - Unity - 2025</p>
             </article>
 
-            <article class="project-card project-two">
+            <article class="project-card project-two" data-home-project-slot="1">
               <div class="window-top">
                 <img class="dot dot-one" src="assets/figma/ellipse-434.svg" alt="" />
                 <img class="dot dot-two" src="assets/figma/ellipse-435.svg" alt="" />
@@ -127,10 +133,10 @@
               <img class="project-image" src="assets/figma/image-219.png" alt="FAMOUSE Feline website screenshot" />
               <img class="line line-top" src="assets/figma/line-1.svg" alt="" />
               <img class="line line-bottom" src="assets/figma/line-2.svg" alt="" />
-              <p>Teacher - Web - 2026</p>
+              <p class="project-meta">Teacher - Web - 2026</p>
             </article>
 
-            <article class="project-card project-three">
+            <article class="project-card project-three" data-home-project-slot="2">
               <div class="window-top">
                 <img class="dot dot-one" src="assets/figma/ellipse-434.svg" alt="" />
                 <img class="dot dot-two" src="assets/figma/ellipse-435.svg" alt="" />
@@ -140,7 +146,7 @@
               <img class="project-image" src="assets/figma/image-220.png" alt="IKEA Game project screenshot" />
               <img class="line line-top" src="assets/figma/line-1.svg" alt="" />
               <img class="line line-bottom" src="assets/figma/line-2.svg" alt="" />
-              <p>Student - Unity - 2026</p>
+              <p class="project-meta">Student - Unity - 2026</p>
             </article>
 
             <a class="pill projects-pill" href="projects.html">See way more projects <img class="arrow-icon" src="assets/icons/arrow-right.svg" alt="" /></a>
@@ -333,5 +339,150 @@
       </div>
     </main>
     <script src="script.js"></script>
+
+    <script>
+      // Pulls the same project.json data as projects.html and drops the
+      // top 3 (featured first, then most recent) into the 3 preview cards
+      // in the "services" section. If the fetch fails or there aren't
+      // enough valid projects, the static fallback markup already in the
+      // HTML is left untouched.
+      (() => {
+        const ORG = "Carterville-Coding-Club";
+        const API = "https://api.github.com";
+        const slots = document.querySelectorAll("[data-home-project-slot]");
+
+        if (!slots.length) return;
+
+        async function github(path) {
+          const response = await fetch(`${API}${path}`);
+
+          if (!response.ok) {
+            throw new Error(`GitHub returned ${response.status}`);
+          }
+
+          return response.json();
+        }
+
+        async function getRepos() {
+          const repos = [];
+
+          for (let page = 1; ; page++) {
+            const results = await github(
+              `/orgs/${ORG}/repos?type=public&per_page=100&page=${page}`
+            );
+
+            repos.push(...results);
+
+            if (results.length < 100) break;
+          }
+
+          return repos;
+        }
+
+        async function getProject(repo) {
+          const response = await fetch(
+            `${API}/repos/${ORG}/${repo.name}/contents/project.json`
+          );
+
+          if (response.status === 404) return null;
+          if (!response.ok) return null;
+
+          const file = await response.json();
+          const content = file.content.replace(/\n/g, "");
+
+          try {
+            return JSON.parse(atob(content));
+          } catch {
+            return null;
+          }
+        }
+
+        function validProject(project) {
+          return (
+            typeof project?.name === "string" &&
+            typeof project?.description === "string" &&
+            typeof project?.banner === "string" &&
+            typeof project?.language === "string" &&
+            typeof project?.status === "string" &&
+            typeof project?.featured === "boolean" &&
+            typeof project?.year === "number" &&
+            Array.isArray(project?.authors)
+          );
+        }
+
+        function bannerUrl(repo, file) {
+          return [
+            "https://raw.githubusercontent.com",
+            ORG,
+            repo.name,
+            repo.default_branch,
+            file
+          ].join("/");
+        }
+
+        function fillSlot(slot, project, repo) {
+          const image = slot.querySelector(".project-image");
+          const title = slot.querySelector(".window-top strong");
+          const meta = slot.querySelector(".project-meta");
+
+          if (image) {
+            image.src = bannerUrl(repo, project.banner);
+            image.alt = `${project.name} project screenshot`;
+            image.addEventListener("error", () => image.remove());
+          }
+
+          if (title) title.textContent = project.name;
+          if (meta) meta.textContent = `${project.language} · ${project.status} · ${project.year}`;
+
+          slot.style.cursor = "pointer";
+          slot.addEventListener("click", () => {
+            window.open(repo.html_url, "_blank", "noopener,noreferrer");
+          });
+        }
+
+        async function loadHomeProjects() {
+          try {
+            const repos = await getRepos();
+
+            const projects = (
+              await Promise.all(
+                repos.map(async repo => {
+                  const project = await getProject(repo);
+
+                  if (!validProject(project)) return null;
+
+                  return { project, repo };
+                })
+              )
+            ).filter(Boolean);
+
+            if (!projects.length) return;
+
+            projects.sort((a, b) => {
+              if (a.project.featured !== b.project.featured) {
+                return Number(b.project.featured) - Number(a.project.featured);
+              }
+
+              return b.project.year - a.project.year;
+            });
+
+            const top = projects.slice(0, slots.length);
+
+            top.forEach((entry, i) => {
+              fillSlot(slots[i], entry.project, entry.repo);
+            });
+
+            for (let i = top.length; i < slots.length; i++) {
+              slots[i].style.display = "none";
+            }
+          } catch (error) {
+            console.error("Could not load homepage projects:", error);
+            // Static fallback markup already in the DOM stays as-is.
+          }
+        }
+
+        loadHomeProjects();
+      })();
+    </script>
   </body>
 </html>
