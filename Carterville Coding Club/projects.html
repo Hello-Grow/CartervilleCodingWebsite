@@ -4,21 +4,301 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Projects | Carterville Coding Club</title>
+
     <link rel="icon" href="assets/coding-club-logo.png" />
-    <link rel="preload" href="assets/zarathustra/ZAR_font/zarathustra-v01.otf" as="font" type="font/otf" crossorigin />
+    <link
+      rel="preload"
+      href="assets/zarathustra/ZAR_font/zarathustra-v01.otf"
+      as="font"
+      type="font/otf"
+      crossorigin
+    />
     <link rel="stylesheet" href="styles.css" />
   </head>
+
   <body class="subpage">
-    <header class="site-header"><nav class="site-nav" aria-label="Main navigation"><a class="brand" href="index.html">CCC</a><div class="nav-right"><a href="index.html">Home</a><a href="about.html">About</a><a href="projects.html" aria-current="page">Projects</a><a href="resources.html">Resources</a><a href="https://hcb.hackclub.com/donations/start/carterville-coding-club" target="_blank" rel="noreferrer">Donate</a><a class="pill nav-pill" href="index.html#join-us">Join us</a></div></nav></header>
+    <header class="site-header">
+      <nav class="site-nav" aria-label="Main navigation">
+        <a class="brand" href="index.html">CCC</a>
+
+        <div class="nav-right">
+          <a href="index.html">Home</a>
+          <a href="about.html">About</a>
+          <a href="projects.html" aria-current="page">Projects</a>
+          <a href="resources.html">Resources</a>
+          <a
+            href="https://hcb.hackclub.com/donations/start/carterville-coding-club"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Donate
+          </a>
+          <a class="pill nav-pill" href="index.html#join-us">Join us</a>
+        </div>
+      </nav>
+    </header>
+
     <main class="subpage-main">
-      <section class="subpage-hero"><p class="eyebrow">Made by our club</p><h1>Projects worth <span class="blue">sharing.</span></h1><p>From first experiments to games and websites, see what Carterville Coding Club members are making.</p></section>
-      <section class="subpage-content project-page-grid" aria-label="Club projects">
-        <article class="project-page-card"><img src="assets/figma/image-218.png" alt="Ball Rolling project screenshot" /><div><h2>Ball Rolling</h2><p>Student · Unity · 2025</p></div></article>
-        <article class="project-page-card"><img src="assets/figma/image-219.png" alt="FAMOUSE Feline website screenshot" /><div><h2>FAMOUSE Feline Website</h2><p>Teacher · Web · 2026</p></div></article>
-        <article class="project-page-card"><img src="assets/figma/image-220.png" alt="IKEA Game project screenshot" /><div><h2>IKEA Game</h2><p>Student · Unity · 2026</p></div></article>
+      <section class="subpage-hero">
+        <p class="eyebrow">Made by our club</p>
+        <h1>Projects worth <span class="blue">sharing.</span></h1>
+        <p>
+          From first experiments to games and websites, see what
+          Carterville Coding Club members are making.
+        </p>
+      </section>
+
+      <section
+        class="subpage-content project-page-grid"
+        id="projects-grid"
+        aria-label="Club projects"
+      >
+        <p id="projects-status">Loading projects...</p>
       </section>
     </main>
-    <footer class="subpage-footer"><div class="subpage-footer-layout"><div><a class="footer-brand" href="index.html"><img src="assets/coding-club-logo.png" alt="Carterville Coding Club" /></a><p>For students, by students.<br />Making cool tech together.</p></div><nav><h2>Club</h2><a href="about.html">About</a><a href="projects.html">Projects</a><a href="resources.html">Resources</a></nav><nav><h2>Get involved</h2><a href="index.html#join-us">Join us</a><a href="https://hcb.hackclub.com/donations/start/carterville-coding-club" target="_blank" rel="noreferrer">Donate</a><a href="index.html#leaders">Meet the leaders</a></nav></div><div class="subpage-footer-bottom"><p>© 2026 Carterville Coding Club. Fiscally sponsored by The Hack Foundation, a 501(c)(3) nonprofit.</p><span>Built with ♥ by Robbie Ma</span></div></footer>
+
+    <footer class="subpage-footer">
+      <div class="subpage-footer-layout">
+        <div>
+          <a class="footer-brand" href="index.html">
+            <img
+              src="assets/coding-club-logo.png"
+              alt="Carterville Coding Club"
+            />
+          </a>
+          <p>
+            For students, by students.<br />
+            Making cool tech together.
+          </p>
+        </div>
+
+        <nav>
+          <h2>Club</h2>
+          <a href="about.html">About</a>
+          <a href="projects.html">Projects</a>
+          <a href="resources.html">Resources</a>
+        </nav>
+
+        <nav>
+          <h2>Get involved</h2>
+          <a href="index.html#join-us">Join us</a>
+          <a
+            href="https://hcb.hackclub.com/donations/start/carterville-coding-club"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Donate
+          </a>
+          <a href="index.html#leaders">Meet the leaders</a>
+        </nav>
+      </div>
+
+      <div class="subpage-footer-bottom">
+        <p>
+          © 2026 Carterville Coding Club. Fiscally sponsored by
+          The Hack Foundation, a 501(c)(3) nonprofit.
+        </p>
+        <span>Built with ♥ by Robbie Ma and Ivan Lin</span>
+      </div>
+    </footer>
+
     <script src="script.js"></script>
+
+    <script>
+      const ORG = "Carterville-Coding-Club";
+      const API = "https://api.github.com";
+      const grid = document.querySelector("#projects-grid");
+
+      async function github(path) {
+        const response = await fetch(`${API}${path}`);
+
+        if (!response.ok) {
+          throw new Error(`GitHub returned ${response.status}`);
+        }
+
+        return response.json();
+      }
+
+      async function getRepos() {
+        const repos = [];
+
+        for (let page = 1; ; page++) {
+          const results = await github(
+            `/orgs/${ORG}/repos?type=public&per_page=100&page=${page}`
+          );
+
+          repos.push(...results);
+
+          if (results.length < 100) break;
+        }
+
+        return repos;
+      }
+
+      async function getProject(repo) {
+        const response = await fetch(
+          `${API}/repos/${ORG}/${repo.name}/contents/project.json`
+        );
+
+        if (response.status === 404) return null;
+        if (!response.ok) return null;
+
+        const file = await response.json();
+        const content = file.content.replace(/\n/g, "");
+
+        try {
+          return JSON.parse(atob(content));
+        } catch {
+          return null;
+        }
+      }
+
+      function validProject(project) {
+        return (
+          typeof project?.name === "string" &&
+          typeof project?.description === "string" &&
+          typeof project?.banner === "string" &&
+          typeof project?.language === "string" &&
+          typeof project?.status === "string" &&
+          typeof project?.featured === "boolean" &&
+          typeof project?.year === "number" &&
+          Array.isArray(project?.authors)
+        );
+      }
+
+      function bannerUrl(repo, file) {
+        return [
+          "https://raw.githubusercontent.com",
+          ORG,
+          repo.name,
+          repo.default_branch,
+          file
+        ].join("/");
+      }
+
+      // Same "figma" card look as the homepage services section: a
+      // macOS-style window-top with 3 dots and a title, the banner image,
+      // top/bottom accent lines, then the project's details underneath.
+      function createCard(project, repo) {
+        const card = document.createElement("article");
+        card.className = "project-card project-page-card";
+
+        const windowTop = document.createElement("div");
+        windowTop.className = "window-top";
+
+        const dotOne = document.createElement("img");
+        dotOne.className = "dot dot-one";
+        dotOne.src = "assets/figma/ellipse-434.svg";
+        dotOne.alt = "";
+
+        const dotTwo = document.createElement("img");
+        dotTwo.className = "dot dot-two";
+        dotTwo.src = "assets/figma/ellipse-435.svg";
+        dotTwo.alt = "";
+
+        const dotThree = document.createElement("img");
+        dotThree.className = "dot dot-three";
+        dotThree.src = "assets/figma/ellipse-436.svg";
+        dotThree.alt = "";
+
+        const title = document.createElement("strong");
+        title.textContent = project.name;
+
+        windowTop.append(dotOne, dotTwo, dotThree, title);
+
+        const image = document.createElement("img");
+        image.className = "project-image";
+        image.src = bannerUrl(repo, project.banner);
+        image.alt = `${project.name} project screenshot`;
+
+        image.addEventListener("error", () => {
+          image.remove();
+        });
+
+        const lineTop = document.createElement("img");
+        lineTop.className = "line line-top";
+        lineTop.src = "assets/figma/line-1.svg";
+        lineTop.alt = "";
+
+        const lineBottom = document.createElement("img");
+        lineBottom.className = "line line-bottom";
+        lineBottom.src = "assets/figma/line-2.svg";
+        lineBottom.alt = "";
+
+        const body = document.createElement("div");
+        body.className = "project-card-body";
+
+        const description = document.createElement("p");
+        description.className = "project-description";
+        description.textContent = project.description;
+
+        const meta = document.createElement("p");
+        meta.className = "project-meta";
+        meta.textContent =
+          `${project.language} · ${project.status} · ${project.year}`;
+
+        const authors = document.createElement("p");
+        authors.className = "project-authors";
+        authors.textContent = project.authors.join(", ");
+
+        body.append(description, meta, authors);
+        card.append(windowTop, image, lineTop, lineBottom, body);
+
+        card.addEventListener("click", () => {
+          window.open(repo.html_url, "_blank", "noopener,noreferrer");
+        });
+
+        return card;
+      }
+
+      async function loadProjects() {
+        try {
+          const repos = await getRepos();
+
+          const projects = (
+            await Promise.all(
+              repos.map(async repo => {
+                const project = await getProject(repo);
+
+                if (!validProject(project)) return null;
+
+                return { project, repo };
+              })
+            )
+          ).filter(Boolean);
+
+          projects.sort((a, b) => {
+            if (a.project.featured !== b.project.featured) {
+              return Number(b.project.featured) - Number(a.project.featured);
+            }
+
+            return b.project.year - a.project.year;
+          });
+
+          grid.replaceChildren();
+
+          if (!projects.length) {
+            const message = document.createElement("p");
+            message.textContent = "No projects found.";
+            grid.appendChild(message);
+            return;
+          }
+
+          for (const { project, repo } of projects) {
+            grid.appendChild(createCard(project, repo));
+          }
+        } catch (error) {
+          console.error("Could not load projects:", error);
+
+          grid.replaceChildren();
+
+          const message = document.createElement("p");
+          message.textContent = "Projects could not be loaded right now.";
+          grid.appendChild(message);
+        }
+      }
+
+      loadProjects();
+    </script>
   </body>
 </html>
