@@ -14,6 +14,245 @@
       crossorigin
     />
     <link rel="stylesheet" href="styles.css" />
+    <style>
+      .project-page-grid {
+        gap: 28px;
+      }
+
+      .project-page-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        border: 2px solid #ffffff;
+        border-radius: 26px;
+        background: var(--night);
+        color: var(--soft);
+        box-shadow: 0 18px 34px rgb(0 0 0 / 0.2);
+        cursor: pointer;
+        transition:
+          transform 180ms ease,
+          border-color 180ms ease,
+          box-shadow 180ms ease;
+      }
+
+      .project-page-card:hover,
+      .project-page-card:focus-visible {
+        transform: translateY(-8px);
+        border-color: var(--orange);
+        box-shadow: 0 28px 60px rgb(0 0 0 / 0.34);
+        outline: 0;
+      }
+
+      .project-page-card .window-top {
+        position: relative;
+        display: flex;
+        align-items: center;
+        flex: 0 0 auto;
+        height: 39px;
+        padding: 0 14px;
+        border-radius: 0;
+      }
+
+      .project-page-card .window-top strong {
+        position: static;
+        margin-left: auto;
+        overflow: hidden;
+        color: var(--soft);
+        font-size: 16px;
+        font-weight: 500;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 65%;
+      }
+
+      .project-page-card .line {
+        position: relative;
+        top: auto;
+        bottom: auto;
+        left: auto;
+        display: block;
+        width: 100%;
+        height: 2px;
+        flex: 0 0 auto;
+      }
+
+      .project-page-card img.project-image {
+        position: relative;
+        top: auto;
+        left: auto;
+        display: block;
+        width: 100%;
+        height: 210px;
+        border-radius: 0;
+        object-fit: cover;
+        flex: 0 0 auto;
+      }
+
+      .project-page-card .project-card-body {
+        padding: 18px 20px 22px;
+      }
+
+      .project-page-card .project-description {
+        margin: 0 0 12px;
+        color: rgb(255 255 255 / 0.66);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .project-page-card .project-meta {
+        margin: 0;
+        color: var(--soft);
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .project-modal-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 32px;
+        background: rgb(6 7 11 / 0.78);
+        backdrop-filter: blur(6px);
+      }
+
+      .project-modal-overlay.is-open {
+        display: flex;
+      }
+
+      .project-modal {
+        position: relative;
+        width: min(720px, 100%);
+        max-height: min(88vh, 820px);
+        overflow-y: auto;
+        border: 2px solid #ffffff;
+        border-radius: 26px;
+        background: var(--night);
+        color: var(--soft);
+        box-shadow: 0 40px 90px rgb(0 0 0 / 0.5);
+      }
+
+      .project-modal-top {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        height: 44px;
+        padding: 0 16px;
+        background: var(--night);
+        border-bottom: 2px solid rgb(255 255 255 / 0.16);
+      }
+
+      .project-modal-top strong {
+        margin-left: auto;
+        overflow: hidden;
+        font-size: 16px;
+        font-weight: 500;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 70%;
+      }
+
+      .project-modal-close {
+        display: grid;
+        place-items: center;
+        width: 28px;
+        height: 28px;
+        margin-left: 12px;
+        border: 1px solid rgb(255 255 255 / 0.5);
+        border-radius: 50%;
+        color: #ffffff;
+        background: transparent;
+        font-size: 16px;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .project-modal-close:hover,
+      .project-modal-close:focus-visible {
+        border-color: var(--orange);
+        color: var(--orange);
+        outline: 0;
+      }
+
+      .project-modal img.project-modal-image {
+        display: block;
+        width: 100%;
+        height: 360px;
+        object-fit: cover;
+      }
+
+      .project-modal-body {
+        padding: 26px 28px 32px;
+      }
+
+      .project-modal-body h2 {
+        margin: 0 0 6px;
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: 32px;
+      }
+
+      .project-modal-meta {
+        margin: 0 0 18px;
+        color: rgb(255 255 255 / 0.62);
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+      }
+
+      .project-modal-description {
+        margin: 0 0 22px;
+        color: rgb(255 255 255 / 0.82);
+        font-size: 16px;
+        line-height: 1.55;
+      }
+
+      .project-modal-authors {
+        margin: 0 0 22px;
+        color: rgb(255 255 255 / 0.62);
+        font-size: 14px;
+      }
+
+      .project-modal-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 22px;
+        border-radius: 999px;
+        background: #ffffff;
+        color: var(--night);
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .project-modal-link:hover,
+      .project-modal-link:focus-visible {
+        background: var(--orange);
+        color: #ffffff;
+      }
+
+      @media (max-width: 700px) {
+        .project-modal-overlay {
+          padding: 16px;
+        }
+
+        .project-modal img.project-modal-image {
+          height: 220px;
+        }
+
+        .project-modal-body {
+          padding: 20px 20px 26px;
+        }
+
+        .project-modal-body h2 {
+          font-size: 26px;
+        }
+      }
+    </style>
   </head>
 
   <body class="subpage">
@@ -56,6 +295,45 @@
         <p id="projects-status">Loading projects...</p>
       </section>
     </main>
+
+    <!-- Project detail modal -->
+    <div class="project-modal-overlay" id="project-modal-overlay">
+      <div
+        class="project-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="project-modal-heading"
+      >
+        <div class="project-modal-top">
+          <button
+            class="project-modal-close"
+            type="button"
+            id="project-modal-close"
+            aria-label="Close"
+          >
+            &times;
+          </button>
+          <strong id="project-modal-title"></strong>
+        </div>
+
+        <img class="project-modal-image" id="project-modal-image" alt="" />
+
+        <div class="project-modal-body">
+          <h2 id="project-modal-heading"></h2>
+          <p class="project-modal-meta" id="project-modal-meta"></p>
+          <p class="project-modal-description" id="project-modal-description"></p>
+          <p class="project-modal-authors" id="project-modal-authors"></p>
+          <a
+            class="project-modal-link"
+            id="project-modal-link"
+            target="_blank"
+            rel="noreferrer"
+          >
+            View on GitHub ↗
+          </a>
+        </div>
+      </div>
+    </div>
 
     <footer class="subpage-footer">
       <div class="subpage-footer-layout">
@@ -108,6 +386,18 @@
       const ORG = "Carterville-Coding-Club";
       const API = "https://api.github.com";
       const grid = document.querySelector("#projects-grid");
+
+      const modalOverlay = document.querySelector("#project-modal-overlay");
+      const modalCloseBtn = document.querySelector("#project-modal-close");
+      const modalTopTitle = document.querySelector("#project-modal-title");
+      const modalImage = document.querySelector("#project-modal-image");
+      const modalHeading = document.querySelector("#project-modal-heading");
+      const modalMeta = document.querySelector("#project-modal-meta");
+      const modalDescription = document.querySelector(
+        "#project-modal-description"
+      );
+      const modalAuthors = document.querySelector("#project-modal-authors");
+      const modalLink = document.querySelector("#project-modal-link");
 
       async function github(path) {
         const response = await fetch(`${API}${path}`);
@@ -176,12 +466,40 @@
         ].join("/");
       }
 
-      // Same "figma" card look as the homepage services section: a
-      // macOS-style window-top with 3 dots and a title, the banner image,
-      // top/bottom accent lines, then the project's details underneath.
+      function openProjectModal(project, repo) {
+        modalTopTitle.textContent = project.name;
+        modalImage.src = bannerUrl(repo, project.banner);
+        modalImage.alt = `${project.name} project screenshot`;
+        modalHeading.textContent = project.name;
+        modalMeta.textContent = `${project.language} · ${project.year}`;
+        modalDescription.textContent = project.description;
+        modalAuthors.textContent = project.authors.join(", ");
+        modalLink.href = repo.html_url;
+
+        modalOverlay.classList.add("is-open");
+        document.body.style.overflow = "hidden";
+        modalCloseBtn.focus();
+      }
+
+      function closeProjectModal() {
+        modalOverlay.classList.remove("is-open");
+        document.body.style.overflow = "";
+      }
+
+      modalCloseBtn.addEventListener("click", closeProjectModal);
+
+      modalOverlay.addEventListener("click", event => {
+        if (event.target === modalOverlay) closeProjectModal();
+      });
+
+      document.addEventListener("keydown", event => {
+        if (event.key === "Escape") closeProjectModal();
+      });
+
       function createCard(project, repo) {
         const card = document.createElement("article");
-        card.className = "project-card project-page-card";
+        card.className = "project-page-card";
+        card.tabIndex = 0;
 
         const windowTop = document.createElement("div");
         windowTop.className = "window-top";
@@ -234,18 +552,19 @@
 
         const meta = document.createElement("p");
         meta.className = "project-meta";
-        meta.textContent =
-          `${project.language} · ${project.status} · ${project.year}`;
+        meta.textContent = `${project.language} · ${project.year}`;
 
-        const authors = document.createElement("p");
-        authors.className = "project-authors";
-        authors.textContent = project.authors.join(", ");
-
-        body.append(description, meta, authors);
+        body.append(description, meta);
         card.append(windowTop, image, lineTop, lineBottom, body);
 
-        card.addEventListener("click", () => {
-          window.open(repo.html_url, "_blank", "noopener,noreferrer");
+        const open = () => openProjectModal(project, repo);
+
+        card.addEventListener("click", open);
+        card.addEventListener("keydown", event => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            open();
+          }
         });
 
         return card;
