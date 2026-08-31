@@ -14,21 +14,6 @@
       crossorigin
     />
     <link rel="stylesheet" href="styles.css" />
-
-    <!--
-      Page-specific fix, kept local to this file (styles.css is untouched):
-
-      The grid cards below reuse the "figma" look (window-top bar w/ dots,
-      banner image, accent lines) from styles.css, which was built for 3
-      fixed, absolutely positioned 378x311px boxes on the home page's
-      pinned stage. The ONLY thing that needs to change for a flowing grid
-      card is how .window-top itself is positioned (relative instead of
-      absolute, so it can anchor a real-width card). The dots (.dot,
-      .dot-one/two/three) and the title (.window-top strong) are left
-      completely alone — same absolute-positioned rules as index.html —
-      which is what makes them render as small circles instead of the
-      stretched color bars from the previous version of this fix.
-    -->
     <style>
       .project-page-grid {
         gap: 28px;
@@ -58,14 +43,6 @@
         box-shadow: 0 28px 60px rgb(0 0 0 / 0.34);
         outline: 0;
       }
-
-      /* Only the containing box changes: absolute -> relative, so it can
-         sit at the top of a normal-flow, variable-width card instead of a
-         fixed 378px stage box. Dots and title keep their original
-         absolute-within-this-box positioning, untouched. */
-      /* The window-top bar now floats OVER the banner image (instead of
-         sitting in its own row above it), so the image fills the entire
-         top of the card, edge to edge. */
       .project-page-card .window-top {
         position: absolute;
         top: 0;
@@ -80,14 +57,6 @@
           rgb(0 0 0 / 0) 100%
         );
       }
-
-      /* styles.css also has a broad ".project-page-card img { width:100%;
-         aspect-ratio:1.55; object-fit:cover; }" rule meant for the banner
-         image. Because it's written as "class + element" it's actually
-         MORE specific than the plain ".dot" class, so it was silently
-         winning and stretching the tiny 13x13 dot icons into full-width
-         color bars. This re-asserts their real size with equal-or-higher
-         specificity so they render as small circles again. */
       .project-page-card .dot {
         position: absolute;
         top: 12px;
@@ -97,9 +66,6 @@
         object-fit: initial;
       }
 
-      /* The top accent line used to mark the boundary between the
-         window-top bar and the image; now that the bar floats over the
-         image instead, that line has nothing to divide, so it's hidden. */
       .project-page-card .line-top {
         display: none;
       }
@@ -154,7 +120,6 @@
         font-weight: 500;
       }
 
-      /* Project detail modal, opened on card click */
       .project-modal-overlay {
         position: fixed;
         inset: 0;
@@ -294,10 +259,6 @@
         background: var(--orange);
         color: #ffffff;
       }
-
-      /* "View Project" — the live/deployed site — is the primary action
-         when available, so it gets the accent color; GitHub becomes the
-         secondary outlined button. */
       .project-modal-link-primary {
         border-color: var(--orange);
         background: var(--orange);
@@ -371,7 +332,6 @@
       </section>
     </main>
 
-    <!-- Project detail modal -->
     <div class="project-modal-overlay" id="project-modal-overlay">
       <div
         class="project-modal"
@@ -469,6 +429,8 @@
     <script src="script.js"></script>
 
     <script>
+
+    // js sucks and so is html
       const ORG = "Carterville-Coding-Club";
       const API = "https://api.github.com";
       const grid = document.querySelector("#projects-grid");
@@ -532,10 +494,6 @@
         }
       }
 
-      // "link" (the live/deployed project URL) is intentionally OPTIONAL
-      // and not part of this required-field check, so existing
-      // project.json files that don't have it yet keep working exactly
-      // as before. When present it just needs to be a string.
       function validProject(project) {
         return (
           typeof project?.name === "string" &&
@@ -569,11 +527,6 @@
         modalAuthors.textContent = project.authors.join(", ");
 
         if (typeof project.link === "string" && project.link.trim()) {
-          // If someone writes "youtube.com" instead of a full URL in
-          // project.json, an <a href> without a scheme resolves as a path
-          // relative to THIS page (e.g. file:///.../youtube.com) instead
-          // of an external site. Auto-add https:// when it's missing so
-          // the link always points where it's supposed to.
           let link = project.link.trim();
 
           if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(link)) {
@@ -609,12 +562,6 @@
         if (event.key === "Escape") closeProjectModal();
       });
 
-      // Same "figma" card look as the homepage services section: a
-      // macOS-style window-top with 3 dots and a title, the banner image,
-      // top/bottom accent lines, then the project's details underneath —
-      // description, language/year, and now the authors (visible without
-      // clicking). Status ("in progress" / "completed" / etc.) is
-      // intentionally never shown to the user.
       function createCard(project, repo) {
         const card = document.createElement("article");
         card.className = "project-page-card";
@@ -662,9 +609,6 @@
         const body = document.createElement("div");
         body.className = "project-card-body";
 
-        // Project name now lives here, bold, instead of overlaid on the
-        // image — with the author(s) directly beneath it, greyed out, so
-        // who made it is visible without clicking into the card.
         const title = document.createElement("strong");
         title.className = "project-title";
         title.textContent = project.name;
