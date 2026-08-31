@@ -14,6 +14,21 @@
       crossorigin
     />
     <link rel="stylesheet" href="styles.css" />
+
+    <!--
+      Page-specific fix, kept local to this file (styles.css is untouched):
+
+      The grid cards below reuse the "figma" look (window-top bar w/ dots,
+      banner image, accent lines) from styles.css, which was built for 3
+      fixed, absolutely positioned 378x311px boxes on the home page's
+      pinned stage. The ONLY thing that needs to change for a flowing grid
+      card is how .window-top itself is positioned (relative instead of
+      absolute, so it can anchor a real-width card). The dots (.dot,
+      .dot-one/two/three) and the title (.window-top strong) are left
+      completely alone — same absolute-positioned rules as index.html —
+      which is what makes them render as small circles instead of the
+      stretched color bars from the previous version of this fix.
+    -->
     <style>
       .project-page-grid {
         gap: 28px;
@@ -44,26 +59,49 @@
         outline: 0;
       }
 
+      /* Only the containing box changes: absolute -> relative, so it can
+         sit at the top of a normal-flow, variable-width card instead of a
+         fixed 378px stage box. Dots and title keep their original
+         absolute-within-this-box positioning, untouched. */
+      /* The window-top bar now floats OVER the banner image (instead of
+         sitting in its own row above it), so the image fills the entire
+         top of the card, edge to edge. */
       .project-page-card .window-top {
-        position: relative;
-        display: flex;
-        align-items: center;
-        flex: 0 0 auto;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 2;
         height: 39px;
-        padding: 0 14px;
         border-radius: 0;
+        background: linear-gradient(
+          180deg,
+          rgb(0 0 0 / 0.55) 0%,
+          rgb(0 0 0 / 0) 100%
+        );
       }
 
-      .project-page-card .window-top strong {
-        position: static;
-        margin-left: auto;
-        overflow: hidden;
-        color: var(--soft);
-        font-size: 16px;
-        font-weight: 500;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        max-width: 65%;
+      /* styles.css also has a broad ".project-page-card img { width:100%;
+         aspect-ratio:1.55; object-fit:cover; }" rule meant for the banner
+         image. Because it's written as "class + element" it's actually
+         MORE specific than the plain ".dot" class, so it was silently
+         winning and stretching the tiny 13x13 dot icons into full-width
+         color bars. This re-asserts their real size with equal-or-higher
+         specificity so they render as small circles again. */
+      .project-page-card .dot {
+        position: absolute;
+        top: 12px;
+        width: 13px;
+        height: 13px;
+        aspect-ratio: auto;
+        object-fit: initial;
+      }
+
+      /* The top accent line used to mark the boundary between the
+         window-top bar and the image; now that the bar floats over the
+         image instead, that line has nothing to divide, so it's hidden. */
+      .project-page-card .line-top {
+        display: none;
       }
 
       .project-page-card .line {
@@ -83,7 +121,7 @@
         left: auto;
         display: block;
         width: 100%;
-        height: 210px;
+        height: 234px;
         border-radius: 0;
         object-fit: cover;
         flex: 0 0 auto;
@@ -93,8 +131,17 @@
         padding: 18px 20px 22px;
       }
 
-      .project-page-card .project-description {
+      .project-page-card .project-title {
         margin: 0 0 12px;
+        color: #ffffff;
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: 22px;
+        font-weight: 700;
+        line-height: 1.15;
+      }
+
+      .project-page-card .project-description {
+        margin: 0 0 4px;
         color: rgb(255 255 255 / 0.66);
         font-size: 14px;
         line-height: 1.5;
@@ -102,10 +149,12 @@
 
       .project-page-card .project-meta {
         margin: 0;
-        color: var(--soft);
+        color: rgb(255 255 255 / 0.5);
         font-size: 14px;
         font-weight: 500;
       }
+
+      /* Project detail modal, opened on card click */
       .project-modal-overlay {
         position: fixed;
         inset: 0;
@@ -217,11 +266,18 @@
         font-size: 14px;
       }
 
+      .project-modal-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
       .project-modal-link {
-        display: inline-flex;
+        display: none;
         align-items: center;
         gap: 8px;
         padding: 12px 22px;
+        border: 2px solid transparent;
         border-radius: 999px;
         background: #ffffff;
         color: var(--night);
@@ -229,10 +285,29 @@
         font-weight: 700;
       }
 
+      .project-modal-link.is-visible {
+        display: inline-flex;
+      }
+
       .project-modal-link:hover,
       .project-modal-link:focus-visible {
         background: var(--orange);
         color: #ffffff;
+      }
+
+      /* "View Project" — the live/deployed site — is the primary action
+         when available, so it gets the accent color; GitHub becomes the
+         secondary outlined button. */
+      .project-modal-link-primary {
+        border-color: var(--orange);
+        background: var(--orange);
+        color: #ffffff;
+      }
+
+      .project-modal-link-primary:hover,
+      .project-modal-link-primary:focus-visible {
+        background: #ffffff;
+        color: var(--night);
       }
 
       @media (max-width: 700px) {
@@ -323,14 +398,25 @@
           <p class="project-modal-meta" id="project-modal-meta"></p>
           <p class="project-modal-description" id="project-modal-description"></p>
           <p class="project-modal-authors" id="project-modal-authors"></p>
-          <a
-            class="project-modal-link"
-            id="project-modal-link"
-            target="_blank"
-            rel="noreferrer"
-          >
-            View on GitHub ↗
-          </a>
+
+          <div class="project-modal-actions">
+            <a
+              class="project-modal-link project-modal-link-primary"
+              id="project-modal-project-link"
+              target="_blank"
+              rel="noreferrer"
+            >
+              View Project ↗
+            </a>
+            <a
+              class="project-modal-link is-visible"
+              id="project-modal-link"
+              target="_blank"
+              rel="noreferrer"
+            >
+              View on GitHub ↗
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -397,6 +483,9 @@
         "#project-modal-description"
       );
       const modalAuthors = document.querySelector("#project-modal-authors");
+      const modalProjectLink = document.querySelector(
+        "#project-modal-project-link"
+      );
       const modalLink = document.querySelector("#project-modal-link");
 
       async function github(path) {
@@ -443,6 +532,10 @@
         }
       }
 
+      // "link" (the live/deployed project URL) is intentionally OPTIONAL
+      // and not part of this required-field check, so existing
+      // project.json files that don't have it yet keep working exactly
+      // as before. When present it just needs to be a string.
       function validProject(project) {
         return (
           typeof project?.name === "string" &&
@@ -474,6 +567,26 @@
         modalMeta.textContent = `${project.language} · ${project.year}`;
         modalDescription.textContent = project.description;
         modalAuthors.textContent = project.authors.join(", ");
+
+        if (typeof project.link === "string" && project.link.trim()) {
+          // If someone writes "youtube.com" instead of a full URL in
+          // project.json, an <a href> without a scheme resolves as a path
+          // relative to THIS page (e.g. file:///.../youtube.com) instead
+          // of an external site. Auto-add https:// when it's missing so
+          // the link always points where it's supposed to.
+          let link = project.link.trim();
+
+          if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(link)) {
+            link = `https://${link}`;
+          }
+
+          modalProjectLink.href = link;
+          modalProjectLink.classList.add("is-visible");
+        } else {
+          modalProjectLink.removeAttribute("href");
+          modalProjectLink.classList.remove("is-visible");
+        }
+
         modalLink.href = repo.html_url;
 
         modalOverlay.classList.add("is-open");
@@ -496,6 +609,12 @@
         if (event.key === "Escape") closeProjectModal();
       });
 
+      // Same "figma" card look as the homepage services section: a
+      // macOS-style window-top with 3 dots and a title, the banner image,
+      // top/bottom accent lines, then the project's details underneath —
+      // description, language/year, and now the authors (visible without
+      // clicking). Status ("in progress" / "completed" / etc.) is
+      // intentionally never shown to the user.
       function createCard(project, repo) {
         const card = document.createElement("article");
         card.className = "project-page-card";
@@ -519,10 +638,7 @@
         dotThree.src = "assets/figma/ellipse-436.svg";
         dotThree.alt = "";
 
-        const title = document.createElement("strong");
-        title.textContent = project.name;
-
-        windowTop.append(dotOne, dotTwo, dotThree, title);
+        windowTop.append(dotOne, dotTwo, dotThree);
 
         const image = document.createElement("img");
         image.className = "project-image";
@@ -546,15 +662,23 @@
         const body = document.createElement("div");
         body.className = "project-card-body";
 
+        // Project name now lives here, bold, instead of overlaid on the
+        // image — with the author(s) directly beneath it, greyed out, so
+        // who made it is visible without clicking into the card.
+        const title = document.createElement("strong");
+        title.className = "project-title";
+        title.textContent = project.name;
+
         const description = document.createElement("p");
         description.className = "project-description";
         description.textContent = project.description;
 
         const meta = document.createElement("p");
         meta.className = "project-meta";
-        meta.textContent = `${project.language} · ${project.year}`;
+        meta.textContent =
+          `${project.authors.join(", ")} · ${project.language} · ${project.year}`;
 
-        body.append(description, meta);
+        body.append(title, description, meta);
         card.append(windowTop, image, lineTop, lineBottom, body);
 
         const open = () => openProjectModal(project, repo);
