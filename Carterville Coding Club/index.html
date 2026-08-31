@@ -105,12 +105,10 @@
             </div>
 
             <!--
-              These 3 cards are from the club GitHub org (see script
+              These 3 cards are populated live from the club GitHub org (see script
               below), the same way projects.html is. The markup/classes below are
               fallback content and are only shown if the API call fails or hasn't
               finished loading yet.
-
-              In short, idfk i just copy and paste 
             -->
             <article class="project-card project-one" data-home-project-slot="0">
               <div class="window-top">
@@ -343,7 +341,11 @@
     <script src="script.js"></script>
 
     <script>
-      // again copy and paste
+      // Pulls the same project.json data as projects.html and drops the
+      // top 3 (featured first, then most recent) into the 3 preview cards
+      // in the "services" section. If the fetch fails or there aren't
+      // enough valid projects, the static fallback markup already in the
+      // HTML is left untouched.
       (() => {
         const ORG = "Carterville-Coding-Club";
         const API = "https://api.github.com";
@@ -430,7 +432,7 @@
           }
 
           if (title) title.textContent = project.name;
-          if (meta) meta.textContent = `${project.language} · ${project.status} · ${project.year}`;
+          if (meta) meta.textContent = `${project.language} · ${project.year}`;
 
           slot.style.cursor = "pointer";
           slot.addEventListener("click", () => {
