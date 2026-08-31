@@ -38,6 +38,12 @@
 
   function fitStage() {
     if (!stage || !viewport) return;
+    if (window.matchMedia("(max-width: 900px)").matches) {
+      viewport.style.setProperty("--stage-scale", "1");
+      viewport.style.setProperty("--stage-bleed", "0px");
+      viewport.style.height = "auto";
+      return;
+    }
     const viewportWidth = document.documentElement.clientWidth;
     const fitScale = viewportWidth / 1440;
     const scale = fitScale <= 1 ? fitScale : Math.min(1 + (fitScale - 1) * 0.28, 1.12);
@@ -71,6 +77,36 @@
   window.addEventListener("scroll", requestHeroCircuitFlowUpdate, { passive: true });
   window.addEventListener("resize", requestHeroCircuitFlowUpdate);
   updateHeroCircuitFlow();
+
+  document.querySelectorAll(".site-nav").forEach((nav) => {
+    const links = nav.querySelector(".nav-right");
+    if (!links) return;
+
+    const button = document.createElement("button");
+    button.className = "nav-toggle";
+    button.type = "button";
+    button.setAttribute("aria-label", "Open navigation menu");
+    button.setAttribute("aria-expanded", "false");
+    button.innerHTML = '<span></span><span></span><span></span>';
+    nav.append(button);
+
+    const closeMenu = () => {
+      nav.classList.remove("menu-open");
+      button.setAttribute("aria-expanded", "false");
+      button.setAttribute("aria-label", "Open navigation menu");
+    };
+
+    button.addEventListener("click", () => {
+      const isOpen = nav.classList.toggle("menu-open");
+      button.setAttribute("aria-expanded", String(isOpen));
+      button.setAttribute("aria-label", isOpen ? "Close navigation menu" : "Open navigation menu");
+    });
+
+    links.querySelectorAll("a").forEach((link) => link.addEventListener("click", closeMenu));
+    window.addEventListener("resize", () => {
+      if (!window.matchMedia("(max-width: 900px)").matches) closeMenu();
+    });
+  });
 
   const calendarTitle = document.getElementById("calendar-title");
   const calendarGrid = document.querySelector(".calendar-grid");
