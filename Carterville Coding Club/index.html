@@ -104,12 +104,6 @@
               </p>
             </div>
 
-            <!--
-              These 3 cards are populated live from the club GitHub org (see script
-              below), the same way projects.html is. The markup/classes below are
-              fallback content and are only shown if the API call fails or hasn't
-              finished loading yet.
-            -->
             <article class="project-card project-one" data-home-project-slot="0">
               <div class="window-top">
                 <img class="dot dot-one" src="assets/figma/ellipse-434.svg" alt="" />
@@ -341,11 +335,6 @@
     <script src="script.js"></script>
 
     <script>
-      // Pulls the same project.json data as projects.html and drops the
-      // top 3 (featured first, then most recent) into the 3 preview cards
-      // in the "services" section. If the fetch fails or there aren't
-      // enough valid projects, the static fallback markup already in the
-      // HTML is left untouched.
       (() => {
         const ORG = "Carterville-Coding-Club";
         const API = "https://api.github.com";
@@ -477,7 +466,6 @@
             }
           } catch (error) {
             console.error("Could not load homepage projects:", error);
-            // Static fallback markup already in the DOM stays as-is.
           }
         }
 
